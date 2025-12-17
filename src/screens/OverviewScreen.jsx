@@ -6,7 +6,9 @@ import { MdInput } from "react-icons/md";
 import { MdOutlineOutput } from "react-icons/md";
 import { HiHomeModern } from "react-icons/hi2";
 import DashBoardSliderCard from "../components/DashBoardSliderCard.jsx";
-import {getAllPosts} from "../AxiosHandler.jsx";
+import {getTotalSolar} from "../api/AxiosHandler.jsx";
+import {mapSolarData} from "../Zipper.jsx";
+import SolarChart from "../components/LineChart.jsx";
 
 const OverviewScreen = ({
                              input = 4.2,   // kW
@@ -19,17 +21,22 @@ const OverviewScreen = ({
     const [data, setData] = useState(null);
 
     useEffect(() => {
+        if (data) {
+            console.log("JETZT sind die Daten im State:", data);
+        }
+    }, [data]);
+
+    useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await getAllPosts();
-                setData(response.data);
+                const response = await getTotalSolar();
+                const meineDaten = mapSolarData(response.data);
+                setData(meineDaten)
+
             } catch (error) {
-                console.error("Fehler beim Laden:", error);
+                console.error("Error while Loading", error);
             }
-
-            console.log("Daten wurden gepackt")
         };
-
         fetchData();
     }, []);
 
@@ -52,6 +59,9 @@ const OverviewScreen = ({
             </div>
             <div className="slider">
                 <DashBoardSliderCard title={"Configuration"}/>
+            </div>
+            <div className= "slider">
+                <SolarChart chartData={data}/>
             </div>
         </div>
     );
