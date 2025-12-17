@@ -2,14 +2,15 @@
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%;
-  width: 100%;
-  background-color: #68d391;
+
 }
 
-/* 2. Ensure the React entry point takes up that space */
 #root {
   width: 100%;
-  height: 100%;  /* <--- This is the missing link */
+  height: 100%;
   margin: 0 auto;
+  background-color: #302e2e;
+
 }
+
+

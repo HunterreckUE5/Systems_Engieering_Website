@@ -1,20 +1,37 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import './OverviewScreen.css';
 import DashboardCard from "../components/DashboardCard.jsx";
 import {CiBatteryCharging} from "react-icons/ci";
+import { MdInput } from "react-icons/md";
+import { MdOutlineOutput } from "react-icons/md";
+import { HiHomeModern } from "react-icons/hi2";
+import DashBoardSliderCard from "../components/DashBoardSliderCard.jsx";
+import {getAllPosts} from "../AxiosHandler.jsx";
 
 const OverviewScreen = ({
-                             solarOutput = 4.2,   // kW
-                             houseConsumption = 2.1, // kW
+                             input = 4.2,   // kW
+                             output = 2.1, // kW
                              batteryLevel = 78       // Percentage
                          }) => {
 
-    // Helper to determine battery color based on charge
- /*   const getBatteryColor = (level) => {
-        if (level > 50) return 'var(--battery-high)';
-        if (level > 20) return 'var(--battery-color)';
-        return 'var(--battery-low)';
-    };*/
+
+
+    const [data, setData] = useState(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getAllPosts();
+                setData(response.data);
+            } catch (error) {
+                console.error("Fehler beim Laden:", error);
+            }
+
+            console.log("Daten wurden gepackt")
+        };
+
+        fetchData();
+    }, []);
 
     return (
         <div className="dashboard-container">
@@ -25,9 +42,16 @@ const OverviewScreen = ({
 
             <div className="stats-grid">
 
-                <DashboardCard textValue = {"100%"} title = {"Battery"} iconPic= { <CiBatteryCharging  size = {100}/>}/>
-                <DashboardCard textValue = {"100%"} title = {"Battery"} iconPic= { <CiBatteryCharging  size = {100}/>}/>
-                <DashboardCard textValue = {"100%"} title = {"Battery"} iconPic= { <CiBatteryCharging  size = {100}/>}/>
+                <DashboardCard textValue = {`${input} kWh`} title = {"Input"} iconPic= { <MdInput size = {50}/>}/>
+                <DashboardCard textValue = {`${batteryLevel}%`} title = {"Battery"} iconPic= { <CiBatteryCharging size = {50}/>}/>
+                <DashboardCard textValue = {`${output} kWh`} title = {"Output"} iconPic= { <MdOutlineOutput size = {50}/>}/>
+                <DashboardCard textValue = {`Normal`} title = {"Mode"} iconPic= { <HiHomeModern  size = {50}/>}/>
+                <DashboardCard textValue = {`${1000} kWh`} title = {"Total Produced"} iconPic= { <HiHomeModern  size = {50}/>}/>
+                <DashboardCard textValue = {`${1500} kWh`} title = {"Total Consumed"} iconPic= { <HiHomeModern  size = {50}/>}/>
+
+            </div>
+            <div className="slider">
+                <DashBoardSliderCard title={"Configuration"}/>
             </div>
         </div>
     );

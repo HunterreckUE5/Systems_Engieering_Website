@@ -1,4 +1,5 @@
-/* EnergyDashboard.css */
+
+
 :root {
     /* DARK MODE PALETTE */
     --bg-color: #000000;         /* Pure Black background for the page */
@@ -30,6 +31,12 @@
 
 .stats-grid{
    display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(250px, 1fr));
-    background-color: #1a1a1a;
-    place-items: center}
+    gap: 6rem;
+    grid-template-columns: repeat(auto-fit,minmax(200px, 300px));
+    justify-content: space-evenly;
+}
+
+.slider{
+    padding: 1.5rem;
+    margin-top: 4rem;
+}
