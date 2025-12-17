@@ -1,0 +1,35 @@
+/* EnergyDashboard.css */
+:root {
+    /* DARK MODE PALETTE */
+    --bg-color: #000000;         /* Pure Black background for the page */
+    --card-bg: #1a1a1a;          /* Dark Gray for the cards */
+    --text-main: #ffffff;        /* White text */
+    --text-secondary: #a0aec0;   /* Light Gray text */
+
+    /* Brand Colors (Slightly brighter for dark mode contrast) */
+    --solar-color: #68d391;      /* Bright Green */
+    --house-color: #63b3ed;      /* Bright Blue */
+    --battery-color: #f6e05e;    /* Bright Yellow */
+    --battery-high: #68d391;
+    --battery-low: #fc8181;
+}
+.dashboard-container {
+    width: 100%;
+    height: 100%;
+    padding: 2rem;        /* Adds breathing room around the edges */
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    margin-bottom: 2rem;
+    text-align: left;     /* Left aligned looks better on wide screens */
+}
+
+.stats-grid{
+   display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(250px, 1fr));
+    background-color: #1a1a1a;
+    place-items: center}
