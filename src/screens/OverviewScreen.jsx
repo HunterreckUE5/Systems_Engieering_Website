@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import './OverviewScreen.css';
 import DashboardCard from "../components/DashboardCard.jsx";
 import { CiBatteryCharging } from "react-icons/ci";
-import { MdInput, MdOutlineOutput, MdPriorityHigh } from "react-icons/md";
+import { MdInput, MdOutlineOutput} from "react-icons/md";
 import { HiHomeModern } from "react-icons/hi2";
 import DashBoardSliderCard from "../components/DashBoardSliderCard.jsx";
 import { getTotalSolar } from "../api/AxiosHandler.jsx";
@@ -10,10 +10,11 @@ import { mapSolarData } from "../Zipper.jsx";
 import SolarChart from "../components/LineChart.jsx";
 import BatteryHandler from "../battery/BatteryHandler.jsx";
 import DataHistory from "../historiedata/DataHistory.jsx";
-import {AiFillCarryOut} from "react-icons/ai";
-import {GiElectric} from "react-icons/gi";
+import { GiElectric } from "react-icons/gi";
+import localStorageHelper from "../LocalStorageHelper.jsx"
 
 const USE_STUB = false;
+const BATTERY_TRESHOLD_LOCALSTORAGE_KEY = "batteryThreshold";
 
 // Initialisierung außerhalb, damit die Instanz über Renders hinweg bestehen bleibt
 const batteryManager = new BatteryHandler(78, 80);
@@ -28,15 +29,22 @@ const generateStubData = () => ({
 });
 
 const OverviewScreen = () => {
+
+    let lsBatteryThreshold = localStorageHelper.get(BATTERY_TRESHOLD_LOCALSTORAGE_KEY);
+
+    if (lsBatteryThreshold < 0) {
+        lsBatteryThreshold = 50;
+    }
+
     const [data, setData] = useState(null);
-    const [threshold, setThreshold] = useState(80);
+    const [threshold, setThreshold] = useState(lsBatteryThreshold);
     const [liveInput, setLiveInput] = useState(0);
     const [liveOutput, setLiveOutput] = useState(0);
     const [liveBattery, setLiveBattery] = useState(78);
-    const thresholdRef = useRef(80);
+    const thresholdRef = useRef(lsBatteryThreshold);
 
     const isChargingMode = liveBattery < threshold;
-    const systemMode = isChargingMode ? "Batterie laden" : "SolarEnergie";
+    const systemMode = isChargingMode ? "Batterie laden" : "Solar Energie";
 
     const handleSliderChange = (event, newValue) => {
         setThreshold(newValue);
@@ -104,26 +112,26 @@ const OverviewScreen = () => {
                 <DashboardCard
                     textValue={`${liveInput.toFixed(2)} kWh`}
                     title={"Eingang (PV)"}
-                    iconPic={<MdInput size={50}/>}
+                    iconPic={<MdInput size={50} />}
                 />
                 <DashboardCard
                     textValue={`${liveBattery}%`}
                     title={"Batterie"}
-                    iconPic={<CiBatteryCharging size={50}/>}
+                    iconPic={<CiBatteryCharging size={50} />}
                 />
                 <DashboardCard
                     textValue={`${liveOutput.toFixed(2)} kWh`}
                     title={"Ausgang (Last)"}
-                    iconPic={<MdOutlineOutput size={50}/>}
+                    iconPic={<MdOutlineOutput size={50} />}
                 />
 
                 <DashboardCard
                     textValue={systemMode}
                     title={"Modus"}
-                    iconPic={isChargingMode ? <CiBatteryCharging size={50}/> : <GiElectric size={50}/>}
+                    iconPic={isChargingMode ? <CiBatteryCharging size={50} /> : <GiElectric size={50} />}
                 />
-                <DashboardCard textValue={`${dataHistory.getAmountOfProducedElectircity()} kWh`} title={"Gesamt Erzeugt"} iconPic={<HiHomeModern size={50}/>}/>
-                <DashboardCard textValue={`${dataHistory.getAmountOfConsumedElectricity()} kWh`} title={"Gesamt Verbrauch"} iconPic={<HiHomeModern size={50}/>}/>
+                <DashboardCard textValue={`${dataHistory.getAmountOfProducedElectircity()} kWh`} title={"Gesamt Erzeugt"} iconPic={<HiHomeModern size={50} />} />
+                <DashboardCard textValue={`${dataHistory.getAmountOfConsumedElectricity()} kWh`} title={"Gesamt Verbrauch"} iconPic={<HiHomeModern size={50} />} />
             </div>
 
             <div className="slider">
@@ -135,7 +143,7 @@ const OverviewScreen = () => {
             </div>
 
             <div className="slider">
-                <SolarChart chartData={data}/>
+                <SolarChart chartData={data} />
             </div>
         </div>
     );

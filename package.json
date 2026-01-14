@@ -11,6 +11,7 @@
     "test:browser": "vitest --config=vitest.browser.config.js"
   },
   "dependencies": {
+    "@base-ui/react": "^1.0.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^7.3.6",
