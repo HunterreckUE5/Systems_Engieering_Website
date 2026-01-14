@@ -9,11 +9,15 @@ import { getTotalSolar } from "../api/AxiosHandler.jsx";
 import { mapSolarData } from "../Zipper.jsx";
 import SolarChart from "../components/LineChart.jsx";
 import BatteryHandler from "../battery/BatteryHandler.jsx";
+import DataHistory from "../historiedata/DataHistory.jsx";
+import {AiFillCarryOut} from "react-icons/ai";
+import {GiElectric} from "react-icons/gi";
 
 const USE_STUB = true;
 
 // Initialisierung außerhalb, damit die Instanz über Renders hinweg bestehen bleibt
 const batteryManager = new BatteryHandler(78, 80);
+const dataHistory = new DataHistory(0,0)
 
 const generateStubData = () => ({
     data: Array.from({ length: 10 }, (_, i) => ({
@@ -29,11 +33,10 @@ const OverviewScreen = () => {
     const [liveInput, setLiveInput] = useState(0);
     const [liveOutput, setLiveOutput] = useState(0);
     const [liveBattery, setLiveBattery] = useState(78);
-
     const thresholdRef = useRef(80);
 
     const isChargingMode = liveBattery < threshold;
-    const systemMode = isChargingMode ? "Batterie laden" : "Hoher Eigenverbrauch";
+    const systemMode = isChargingMode ? "Batterie laden" : "SolarEnergie";
 
     const handleSliderChange = (event, newValue) => {
         setThreshold(newValue);
@@ -54,6 +57,7 @@ const OverviewScreen = () => {
                     const latest = response.data[response.data.length - 1];
                     currentIn = latest.input;
                     currentOut = latest.output;
+
                 } else {
                     // ECHTER API MODUS
                     response = await getTotalSolar(); // Nur EINMAL aufrufen
@@ -67,7 +71,6 @@ const OverviewScreen = () => {
                     }
                 }
 
-                // Sicherstellen, dass response existiert, bevor wir mappen
                 if (response && response.data) {
                     const meineDaten = mapSolarData(response.data);
                     setData(meineDaten);
@@ -75,9 +78,10 @@ const OverviewScreen = () => {
                     setLiveInput(currentIn);
                     setLiveOutput(currentOut);
 
-                    // Batterie-Logik
                     batteryManager.updateCapacity(currentIn, currentOut);
                     setLiveBattery(batteryManager.getCurrentCapacity());
+                    dataHistory.updateAmountOfProducedElectricity(currentIn)
+                    dataHistory.updateAmountOfConsumedElectricity(currentOut)
                 }
 
             } catch (error) {
@@ -117,10 +121,10 @@ const OverviewScreen = () => {
                 <DashboardCard
                     textValue={systemMode}
                     title={"Modus"}
-                    iconPic={isChargingMode ? <CiBatteryCharging size={50}/> : <MdPriorityHigh size={50}/>}
+                    iconPic={isChargingMode ? <CiBatteryCharging size={50}/> : <GiElectric size={50}/>}
                 />
-                <DashboardCard textValue={`1000 kWh`} title={"Gesamt Erzeugt"} iconPic={<HiHomeModern size={50}/>}/>
-                <DashboardCard textValue={`500 kWh`} title={"Gesamt Verbrauch"} iconPic={<HiHomeModern size={50}/>}/>
+                <DashboardCard textValue={`${dataHistory.getAmountOfProducedElectircity()} kWh`} title={"Gesamt Erzeugt"} iconPic={<HiHomeModern size={50}/>}/>
+                <DashboardCard textValue={`${dataHistory.getAmountOfConsumedElectricity()} kWh`} title={"Gesamt Verbrauch"} iconPic={<HiHomeModern size={50}/>}/>
             </div>
 
             <div className="slider">
