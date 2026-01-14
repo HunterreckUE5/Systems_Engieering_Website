@@ -13,7 +13,7 @@ import DataHistory from "../historiedata/DataHistory.jsx";
 import {AiFillCarryOut} from "react-icons/ai";
 import {GiElectric} from "react-icons/gi";
 
-const USE_STUB = true;
+const USE_STUB = false;
 
 // Initialisierung außerhalb, damit die Instanz über Renders hinweg bestehen bleibt
 const batteryManager = new BatteryHandler(78, 80);
@@ -98,7 +98,6 @@ const OverviewScreen = () => {
         <div className="dashboard-container">
             <div className="header">
                 <h2>System Status</h2>
-                <p>Aktualisierung alle 5 Sekunden {USE_STUB && "(Simulationsmodus)"}</p>
             </div>
 
             <div className="stats-grid">
