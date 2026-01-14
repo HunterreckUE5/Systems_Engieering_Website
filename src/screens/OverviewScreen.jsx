@@ -10,7 +10,7 @@ import { mapSolarData } from "../Zipper.jsx";
 import SolarChart from "../components/LineChart.jsx";
 import BatteryHandler from "../battery/BatteryHandler.jsx";
 
-const USE_STUB = false;
+const USE_STUB = true;
 
 // Initialisierung außerhalb, damit die Instanz über Renders hinweg bestehen bleibt
 const batteryManager = new BatteryHandler(78, 80);
@@ -30,7 +30,6 @@ const OverviewScreen = () => {
     const [liveOutput, setLiveOutput] = useState(0);
     const [liveBattery, setLiveBattery] = useState(78);
 
-    // Diese Ref speichert den aktuellen Threshold, ohne den Effekt neu zu triggern
     const thresholdRef = useRef(80);
 
     const isChargingMode = liveBattery < threshold;
@@ -38,7 +37,6 @@ const OverviewScreen = () => {
 
     const handleSliderChange = (event, newValue) => {
         setThreshold(newValue);
-        // Wir aktualisieren die Ref und den Manager sofort
         thresholdRef.current = newValue;
         batteryManager.setThreshold(newValue);
     };
@@ -47,9 +45,9 @@ const OverviewScreen = () => {
         const updateData = async () => {
             console.log("Daten-Update Zyklus gefeuert...");
             try {
-                let response;
-                let currentIn;
-                let currentOut;
+                let response; // Diese Variable muss gefüllt werden
+                let currentIn = 0;
+                let currentOut = 4.0; // Standardwert für den Real-Modus
 
                 if (USE_STUB) {
                     response = generateStubData();
@@ -57,36 +55,40 @@ const OverviewScreen = () => {
                     currentIn = latest.input;
                     currentOut = latest.output;
                 } else {
-                    response = await getTotalSolar();
-                    const latest = response.data[response.data.length - 1];
-                    currentIn = latest.value;
-                    currentOut = 4.0;
+                    // ECHTER API MODUS
+                    response = await getTotalSolar(); // Nur EINMAL aufrufen
+
+                    if (response && response.data && response.data.length > 0) {
+                        const mapped = mapSolarData(response.data);
+                        // Den aktuellsten Wert aus den gemappten Daten nehmen
+                        const latest = mapped[mapped.length - 1];
+                        currentIn = latest.value;
+                        currentOut = 4.0; // Hier dein gewünschter Real-Verbrauch
+                    }
                 }
 
-                // UI States setzen
-                setData(mapSolarData(response.data));
-                setLiveInput(currentIn);
-                setLiveOutput(currentOut);
+                // Sicherstellen, dass response existiert, bevor wir mappen
+                if (response && response.data) {
+                    const meineDaten = mapSolarData(response.data);
+                    setData(meineDaten);
 
-                // Die Logik nutzt den batteryManager, der bereits
-                // über handleSliderChange den aktuellen Threshold kennt.
-                batteryManager.updateCapacity(currentIn, currentOut);
-                setLiveBattery(batteryManager.getCurrentCapacity());
+                    setLiveInput(currentIn);
+                    setLiveOutput(currentOut);
+
+                    // Batterie-Logik
+                    batteryManager.updateCapacity(currentIn, currentOut);
+                    setLiveBattery(batteryManager.getCurrentCapacity());
+                }
 
             } catch (error) {
-                console.error("Fehler beim Laden:", error);
+                console.error("Fehler beim Laden oder Verarbeiten:", error);
             }
         };
 
-        // Initialer Aufruf beim Start
         updateData();
-
-        // Das Intervall hat nun ein leeres Dependency-Array.
-        // Es wird einmal gestartet und läuft alle 5s, egal was am Slider passiert.
         const interval = setInterval(updateData, 5000);
-
         return () => clearInterval(interval);
-    }, []); // LEERES ARRAY: Verhindert Neustart bei Slider-Bewegung
+    }, []);
 
     return (
         <div className="dashboard-container">
